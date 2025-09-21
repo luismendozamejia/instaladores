@@ -1,32 +1,38 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Selector de instaladores por dirección</title>
 <style>
+  :root { --border:#e8e8e8; --muted:#666; --accent:#0d6efd; }
   body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, Helvetica, sans-serif; margin: 24px; }
-  .wrap { max-width: 1000px; margin: 0 auto; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
   h1 { font-size: 22px; margin-bottom: 8px; }
   .hint { color: #555; font-size: 14px; margin-bottom: 18px; }
   .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  input[type="text"] { flex: 1 1 520px; padding: 10px 12px; border-radius: 8px; border: 1px solid #bbb; }
-  button { padding: 10px 14px; border-radius: 8px; border: 0; background:#0d6efd; color:white; cursor:pointer; }
+  input[type="text"] { flex: 1 1 520px; padding: 10px 12px; border-radius: 10px; border: 1px solid #bbb; }
+  button { padding: 10px 14px; border-radius: 10px; border: 0; background:var(--accent); color:white; cursor:pointer; }
   button:disabled { background:#9bbcf5; cursor:not-allowed; }
-  table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-  th, td { padding: 10px 10px; border-bottom: 1px solid #eee; text-align: left; }
-  th { background: #f6f7fb; }
-  .grid { display:grid; grid-template-columns: 1fr 380px; gap: 18px; align-items:start; }
-  .card { border:1px solid #e8e8e8; border-radius: 12px; padding: 12px; }
-  .muted { color:#666; font-size:13px; }
-  .note { background:#fff9e6; border:1px solid #ffe5a3; padding:10px 12px; border-radius:10px; font-size:13px; }
-  .small { font-size:12px; color:#666; }
+  .grid { display:grid; grid-template-columns: 1fr 420px; gap: 18px; align-items:start; }
+  .card { border:1px solid var(--border); border-radius: 14px; padding: 14px; background:#fff; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+  th { background: #f6f7fb; border-top-left-radius: 10px; border-top-right-radius: 10px; }
+  .small { font-size:12px; color:var(--muted); }
+  .muted { color:var(--muted); }
+  .badge { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef5ff; color:var(--accent); font-size:12px; }
+  .pill { padding:2px 6px; border:1px solid #ddd; border-radius:999px; font-size:12px; }
+  #map { width: 100%; height: 420px; border-radius: 12px; border:1px solid var(--border); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Selector de instaladores por dirección</h1>
-  <div class="hint">Introduce una <b>dirección</b> (o ciudad/provincia) y te mostraré los instaladores ordenados por <b>Calificación</b>. La tabla de base se toma desde la <b>tercera fila</b> del listado.</div>
+  <div class="hint">
+    Escribe una <b>dirección</b> (o ciudad/provincia) y verás los instaladores <b>activos</b> que operan en la zona,
+    ordenados por <b>Calificación</b>. Los datos se leen desde la <b>fila 3</b> de tu Google Sheet.
+  </div>
 
   <div class="row">
     <input id="addr" type="text" placeholder="Ej.: Calle Mayor 10, Madrid / Palma de Mallorca / Elche, Alicante…" />
@@ -36,10 +42,9 @@
   <div class="grid" style="margin-top:16px;">
     <div>
       <div class="card">
+        <div class="small">Resultado ordenado por <b>Calificación</b> (desc). Solo se consideran instaladores <b>Activos</b>.</div>
         <table id="res">
-          <thead>
-            <tr><th>Instalador</th><th>Zona</th><th>Calificación</th></tr>
-          </thead>
+          <thead><tr><th>Instalador</th><th>Zona</th><th>Calificación</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -47,28 +52,221 @@
 
     <div>
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <div><b>Mapa de zonas (aprox.)</b></div>
-          <div class="small muted">Referencia sin conexión</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div><b>Mapa</b></div>
+          <div class="small muted">Se marca la dirección buscada</div>
         </div>
-        <svg id="map" viewBox="-10 35 15 10" width="100%" height="360" style="border:1px solid #eee;border-radius:10px;"></svg>
-        <div class="small muted" style="margin-top:6px;">Marcadores: círculo = ciudades de referencia; estrella = región detectada; cuadrado = instaladores recomendados.</div>
-      </div>
-
-      <div class="note" style="margin-top:10px;">
-        Consejo: edita las <b>Calificaciones</b> en la hoja de Google y recarga esta página.
+        <div id="map"></div>
       </div>
 
       <div class="card" style="margin-top:12px;">
-        <div><b>Mapa estático de referencia</b></div>
-        <img src="mapa_instaladores_base.png" alt="Mapa estático" style="width:100%;height:auto;border:1px solid #eee;border-radius:10px;margin-top:8px;">
-        <div class="small muted" style="margin-top:6px;">Este mapa es estático y sirve como referencia visual del área (España + Baleares).</div>
+        <div class="small">
+          Consejo: actualiza <b>Calificación</b> o <b>Activo</b> en la hoja y recarga esta página.
+          (Si cambias de pestaña en el Sheet, actualiza el <code>gid</code> en la URL CSV).
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="small" style="margin-top:8px;">Fuente: Google Sheet (se omiten las dos primeras filas de datos; se usa desde la fila 3).</div>
+  <div class="small" style="margin-top:8px;">
+    Fuente: Google Sheet → 
+    <a href="https://docs.google.com/spreadsheets/d/1QVIOjyy29qwhPPoPcYypW8rXxfIB0nYZ93Dqz8c0GMk/edit?gid=1199673994#gid=1199673994" target="_blank" rel="noopener">abrir hoja</a>
+  </div>
 </div>
 
 <script>
-// === 1) Config:
+/* ===================== CONFIG ===================== */
+// Export CSV público de tu hoja (mismo doc, pestaña gid=1199673994)
+const SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/1QVIOjyy29qwhPPoPcYypW8rXxfIB0nYZ93Dqz8c0GMk/export?format=csv&gid=1199673994";
+
+/* ================== UTILIDADES CSV ================= */
+function toNum(x){
+  let s = (x===null || x===undefined) ? "" : String(x);
+  let n = parseFloat(s.replace(",", ".").trim());
+  return isNaN(n) ? 0 : n;
+}
+// CSV parser básico compatible con comillas
+function parseCSV(text){
+  const rows=[]; let i=0,cur="",row=[],inQ=false;
+  while(i<text.length){
+    const ch=text[i];
+    if(inQ){
+      if(ch==='"'){ if(text[i+1]==='"'){cur+='"'; i++;} else {inQ=false;} }
+      else cur+=ch;
+    }else{
+      if(ch==='"'){inQ=true;}
+      else if(ch===','){row.push(cur); cur="";}
+      else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&text[i+1]==='\n') i++; row.push(cur); rows.push(row); row=[]; cur=""; }
+      else cur+=ch;
+    }
+    i++;
+  }
+  if(cur.length>0||row.length){ row.push(cur); rows.push(row); }
+  return rows;
+}
+function rowsToObjects(rows){
+  if(!rows.length) return [];
+  const header = rows[0].map(h => String(h||"").trim());
+  const out=[];
+  for(let r=1;r<rows.length;r++){
+    const o={};
+    for(let c=0;c<header.length;c++){ o[header[c]] = (rows[r][c]!==undefined) ? rows[r][c] : ""; }
+    out.push(o);
+  }
+  return out;
+}
+
+/* =========== REGIONES / MATCHING POR ZONA =========== */
+// Palabras que usaremos para cruzar contra la columna "Zona" del Sheet
+const REGION_KEYWORDS = {
+  "madrid": ["madrid","boadilla","villaviciosa","alcobendas","alcorcón","alcorcon","getafe","móstoles","mostoles","pozuelo"],
+  "barcelona": ["barcelona","sant boi","sant cugat","badalona","hospitalet","l'hospitalet","sant cugat"],
+  "valencia": ["valencia","valència","sagunto","torrent"],
+  "alicante": ["alicante","alacant","elche","elx","benidorm"],
+  "sevilla": ["sevilla","dos hermanas","camas","alcalá de guadaíra","alcala de guadaira"],
+  "granada": ["granada","motril","armilla"],
+  "malaga": ["málaga","malaga","marbella","fuengirola","vélez-málaga","velez malaga"],
+  "almeria": ["almería","almeria","roquetas","el ejido"],
+  "asturias": ["asturias","gijón","gijon","oviedo","aviles","avilés","norte","castilla y león","galicia"],
+  "baleares": ["baleares","mallorca","menorca","ibiza","illes balears","islas baleares","palma"],
+  "murcia": ["murcia","cartagena"]
+};
+function detectRegionsFromGeocoder(components){
+  const hits = new Set();
+  for(const comp of components){
+    const name = comp.long_name.toLowerCase();
+    for(const tag in REGION_KEYWORDS){
+      if(REGION_KEYWORDS[tag].some(k=> name.includes(k))){
+        hits.add(tag);
+      }
+    }
+    // tipos administrativos útiles
+    if(comp.types.includes("administrative_area_level_1") || comp.types.includes("administrative_area_level_2")){
+      for(const tag in REGION_KEYWORDS){
+        if(REGION_KEYWORDS[tag].some(k=> name.includes(k))) hits.add(tag);
+      }
+    }
+  }
+  return Array.from(hits);
+}
+function detectRegionsByText(text){
+  const a = String(text||"").toLowerCase();
+  const hits = new Set();
+  for(const tag in REGION_KEYWORDS){
+    if(REGION_KEYWORDS[tag].some(k=> a.includes(k))) hits.add(tag);
+  }
+  return Array.from(hits);
+}
+
+/* =============== CARGA DE DATOS (GOOGLE SHEET) =============== */
+let RAW = []; // se carga desde el CSV
+async function loadSheet(){
+  const resp = await fetch(SHEET_CSV_URL, { cache:"no-store" });
+  const text = await resp.text();
+  const rows = parseCSV(text);
+  let objs = rowsToObjects(rows);
+  // omitir dos primeras filas de datos (empezar en la fila 3)
+  if (objs.length > 2) objs = objs.slice(2);
+  // normalizar tipos
+  for(const o of objs){
+    o["Instalador"] = o["Instalador"] ?? "";
+    o["Zona"] = o["Zona"] ?? "";
+    o["Activo"] = o["Activo"] ?? "";
+    o["Calificación"] = toNum(o["Calificación"]);
+  }
+  RAW = objs;
+}
+
+/* ===================== RECOMENDADOR ===================== */
+function matchInstallers(regions){
+  const active = RAW.filter(r => String(r["Activo"]||"").trim().toLowerCase().match(/^(si|sí|true|yes)$/));
+  if(!regions.length) return active;
+  // contrasta "regiones" contra la columna "Zona"
+  const words = [];
+  for(const r of regions){
+    if(r==="asturias") words.push("asturias","gijón","gijon","norte","castilla y león","galicia");
+    else if(r==="baleares") words.push("baleares","mallorca","ibiza","menorca","illes balears","islas baleares","palma");
+    else words.push(r);
+  }
+  let cands = active.filter(r => words.some(w => String(r["Zona"]||"").toLowerCase().includes(w)));
+  if(!cands.length){
+    // respaldo: si en "Zona" aparece "alrededores"
+    cands = active.filter(r => String(r["Zona"]||"").toLowerCase().includes("alrededor"));
+  }
+  return cands;
+}
+function sortByRating(rows){
+  return rows.slice().sort((a,b)=>{
+    const d = toNum(b["Calificación"]) - toNum(a["Calificación"]);
+    if (Math.abs(d) > 1e-9) return d;
+    return String(a["Instalador"]).localeCompare(String(b["Instalador"]));
+  });
+}
+function renderTable(rows){
+  const tb = document.querySelector("#res tbody");
+  tb.innerHTML = "";
+  if(!rows.length){
+    const tr=document.createElement("tr");
+    const td=document.createElement("td");
+    td.colSpan=3; td.textContent="Sin coincidencias. Prueba con ciudad/provincia (p.ej. Madrid, Valencia, Sevilla, Mallorca).";
+    tr.appendChild(td); tb.appendChild(tr);
+    return;
+  }
+  for(const r of rows){
+    const tr=document.createElement("tr");
+    const td1=document.createElement("td"); td1.textContent=r["Instalador"];
+    const td2=document.createElement("td"); td2.textContent=r["Zona"];
+    const td3=document.createElement("td"); td3.textContent=(r["Calificación"] ?? 0);
+    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+    tb.appendChild(tr);
+  }
+}
+
+/* ===================== GOOGLE MAPS ===================== */
+let map, marker, geocoder;
+function initMap(){
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 40.4168, lng: -3.7038 }, zoom: 6, mapTypeControl: false
+  });
+  geocoder = new google.maps.Geocoder();
+}
+async function locateAndRecommend(addressText){
+  // 1) Si hay texto, geocodificar; si no, solo tabla global
+  let regions = [];
+  if(addressText && addressText.trim()){
+    const { results } = await geocoder.geocode({ address: addressText });
+    if(results && results.length){
+      const r = results[0];
+      // centrar mapa y marcar
+      const loc = r.geometry.location;
+      map.setCenter(loc); map.setZoom(12);
+      if(!marker){ marker = new google.maps.Marker({ map }); }
+      marker.setPosition(loc);
+      // detectar regiones por geocoder
+      regions = detectRegionsFromGeocoder(r.address_components);
+    }else{
+      // respaldo: por texto
+      regions = detectRegionsByText(addressText);
+    }
+  }
+  // 2) Recomendar, ordenar y pintar
+  const matches = matchInstallers(regions);
+  const ordered = sortByRating(matches);
+  renderTable(ordered);
+}
+
+/* ===================== ARRANQUE ===================== */
+document.getElementById("go").addEventListener("click", ()=>{
+  const addr = document.getElementById("addr").value;
+  locateAndRecommend(addr);
+});
+loadSheet().then(()=> locateAndRecommend("") );
+</script>
+
+<!-- Carga de Google Maps JS (reemplaza la API key) -->
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap">
+</script>
+</body>
+</html>
