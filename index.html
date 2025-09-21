@@ -1,0 +1,237 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Selector de instaladores por dirección</title>
+<style>
+  body {{ font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, Helvetica, sans-serif; margin: 24px; }}
+  .wrap {{ max-width: 1000px; margin: 0 auto; }}
+  h1 {{ font-size: 22px; margin-bottom: 8px; }}
+  .hint {{ color: #555; font-size: 14px; margin-bottom: 18px; }}
+  .row {{ display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }}
+  input[type="text"] {{ flex: 1 1 520px; padding: 10px 12px; border-radius: 8px; border: 1px solid #bbb; }}
+  button {{ padding: 10px 14px; border-radius: 8px; border: 0; background:#0d6efd; color:white; cursor:pointer; }}
+  button:disabled {{ background:#9bbcf5; cursor:not-allowed; }}
+  table {{ width: 100%; border-collapse: collapse; margin-top: 16px; }}
+  th, td {{ padding: 10px 10px; border-bottom: 1px solid #eee; text-align: left; }}
+  th {{ background: #f6f7fb; }}
+  .grid {{ display:grid; grid-template-columns: 1fr 380px; gap: 18px; align-items:start; }}
+  .card {{ border:1px solid #e8e8e8; border-radius: 12px; padding: 12px; }}
+  .muted {{ color:#666; font-size:13px; }}
+  .note {{ background:#fff9e6; border:1px solid #ffe5a3; padding:10px 12px; border-radius:10px; font-size:13px; }}
+  .small {{ font-size:12px; color:#666; }}
+  .pill {{ padding:2px 6px; border:1px solid #ddd; border-radius:999px; font-size:12px; }}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Selector de instaladores por dirección</h1>
+  <div class="hint">Introduce una <b>dirección</b> (o ciudad/provincia) y te mostraré los instaladores ordenados por <b>Calificación</b>. La tabla de base se toma desde la <b>tercera fila</b> del listado original.</div>
+  <div class="row">
+    <input id="addr" type="text" placeholder="Ej.: Calle Mayor 10, Madrid / Palma de Mallorca / Elche, Alicante…" />
+    <button id="go">Buscar instaladores</button>
+  </div>
+  <div class="grid" style="margin-top:16px;">
+    <div>
+      <div class="card">
+        <table id="res">
+          <thead>
+            <tr><th>Instalador</th><th>Zona</th><th>Calificación</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><b>Mapa de zonas (aprox.)</b></div>
+          <div class="small muted">Referencia sin conexión</div>
+        </div>
+        <svg id="map" viewBox="-10 35 15 10" width="100%" height="360" style="border:1px solid #eee;border-radius:10px;"></svg>
+        <div class="small muted" style="margin-top:6px;">Marcadores: círculo = ciudades de referencia; estrella = región detectada; cuadrado = instaladores recomendados.</div>
+      </div>
+      <div class="note" style="margin-top:10px;">
+        Consejo: edita las <b>Calificaciones</b> en el CSV base y vuelve a abrir esta herramienta para que el orden se actualice.
+      </div>
+    
+      <div class="card" style="margin-top:12px;">
+        <div><b>Mapa estático de referencia</b></div>
+        <img src="mapa_instaladores_base.png" alt="Mapa estático" style="width:100%;height:auto;border:1px solid #eee;border-radius:10px;margin-top:8px;">
+        <div class="small muted" style="margin-top:6px;">Este mapa es estático y sirve como referencia visual del área (España + Baleares).</div>
+      </div>
+</div>
+  </div>
+  <div class="small" style="margin-top:8px;">Fuente: tabla desde la 3ª fila del CSV generado en esta sesión.</div>
+</div>
+<script>
+const RAW = [{"Instalador": "Harrak", "Zona": "Barcelona", "Activo": "Sí", "Calificación": 3.0}, {"Instalador": "Sergio (ACP / ACP Plus)", "Zona": "Gijón + ~250 km alrededor", "Activo": "Sí", "Calificación": 5.0}, {"Instalador": "Kaylon", "Zona": "Madrid y alrededores", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "Soleon", "Zona": "Madrid (entre Murcia y Madrid)", "Activo": "Sí", "Calificación": 1.0}, {"Instalador": "Inergya", "Zona": "Madrid y alrededores", "Activo": "Sí", "Calificación": 3.0}, {"Instalador": "Vettes", "Zona": "Madrid y alrededores", "Activo": "Sí", "Calificación": 5.0}, {"Instalador": "José Manuel Bugidos", "Zona": "Madrid", "Activo": "Sí", "Calificación": 3.0}, {"Instalador": "Insvert (Javier)", "Zona": "Alicante y Valencia", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "Alrola", "Zona": "Valencia", "Activo": "Sí", "Calificación": 2.0}, {"Instalador": "Bainga", "Zona": "Valencia", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "LEUK", "Zona": "Sevilla (Andalucía)", "Activo": "Sí", "Calificación": ""}, {"Instalador": "Teleplaca", "Zona": "Sevilla (Andalucía)", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "ERA Renovables", "Zona": "Sevilla (Andalucía)", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "Vector Solar", "Zona": "Granada", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "Jovitel", "Zona": "Almería y Málaga", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "BSS", "Zona": "Madrid", "Activo": "Sí", "Calificación": 2.0}, {"Instalador": "Fuerza y Honor (F&H)", "Zona": "Islas Baleares", "Activo": "Sí", "Calificación": 3.0}, {"Instalador": "Soluciones Solares Ibéricas", "Zona": "Islas Baleares", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "Ecoamper", "Zona": "(zona no indicada)", "Activo": "Sí", "Calificación": 5.0}, {"Instalador": "Ecosar", "Zona": "(zona no indicada)", "Activo": "Sí", "Calificación": 4.0}, {"Instalador": "EEGA", "Zona": "(zona no indicada)", "Activo": "Sí", "Calificación": 2.0}];
+const COORDS = {"madrid": [40.4168, -3.7038], "barcelona": [41.3874, 2.1686], "valencia": [39.4699, -0.3763], "alicante": [38.3452, -0.481], "sevilla": [37.3891, -5.9845], "granada": [37.1773, -3.5986], "malaga": [36.7213, -4.4214], "almeria": [36.834, -2.4637], "gijon": [43.5322, -5.6611], "baleares": [39.6953, 3.0176]};
+const REGIONS = {{
+  "madrid": ["madrid","boadilla","villaviciosa de odón","villaviciosa de odon","alcobendas","alcorcón","alcorcon","getafe","móstoles","mostoles"],
+  "barcelona": ["barcelona","sant boi","sant cugat","badalona","hospitalet","l'hospitalet"],
+  "valencia": ["valencia","valència","sagunto","torrent"],
+  "alicante": ["alicante","alacant","elche","elx","benidorm"],
+  "sevilla": ["sevilla","dos hermanas","camas","alcala de guadaira","alcalá de guadaíra"],
+  "granada": ["granada","motril","armilla"],
+  "malaga": ["málaga","malaga","marbella","fuengirola","velez malaga","vèlez-málaga"],
+  "almeria": ["almería","almeria","roquetas","el ejido"],
+  "gijon": ["gijón","gijon","asturias","oviedo","aviles","avilés"],
+  "baleares": ["mallorca","menorca","ibiza","illes balears","islas baleares","palma"],
+  "castilla y león": ["león","leon","burgos","soria","palencia","zamora","valladolid","segovia","ávila","avila","salamanca"],
+  "murcia": ["murcia","cartagena"]
+}};
+
+function toNum(x){ 
+  let s = (x===null || x===undefined) ? "" : String(x);
+  let n = parseFloat(s.replace(",", ".").trim()); 
+  return isNaN(n) ? 0 : n; 
+}
+
+function detectRegions(text){
+  const a = String(text||"").toLowerCase();
+  const hits = new Set();
+  for (const tag in REGIONS){
+    for (const kw of REGIONS[tag]){
+      if (a.includes(kw)) {{ hits.add(tag); break; }}
+    }
+  }
+  return Array.from(hits);
+}
+
+function matchInstallers(regions){
+  const active = RAW.filter(r => String(r["Activo"]||"").trim().toLowerCase().match(/^(si|sí|true|yes)$/));
+  if (!regions.length) return active;
+  const words = [];
+  for (const r of regions){
+    if (r==="gijon") words.push("asturias","gijón","gijon","norte","castilla y león","galicia");
+    else if (r==="baleares") words.push("baleares","mallorca","ibiza","menorca","illes balears","islas baleares","palma");
+    else words.push(r);
+  }
+  let cands = active.filter(r => words.some(w => String(r["Zona"]||"").toLowerCase().includes(w)));
+  if (!cands.length){
+    cands = active.filter(r => String(r["Zona"]||"").toLowerCase().includes("alrededor"));
+  }
+  return cands;
+}
+
+function sortByRating(rows){
+  return rows.slice().sort((a,b)=>{
+    const d = toNum(b["Calificación"]) - toNum(a["Calificación"]);
+    if (Math.abs(d) > 1e-9) return d;
+    return String(a["Instalador"]).localeCompare(String(b["Instalador"]));
+  });
+}
+
+function baseTagFromZona(z){
+  const s = String(z||"").toLowerCase();
+  for (const k in COORDS){
+    if (k==="baleares"){
+      if (s.includes("baleares") || s.includes("mallorca") || s.includes("ibiza") || s.includes("menorca")) return "baleares";
+    } else if (s.includes(k)) return k;
+  }
+  if (s.includes("asturias") || s.includes("galicia") || s.includes("norte") || s.includes("castilla")) return "gijon";
+  if (s.includes("murcia")) return "valencia";
+  return null;
+}
+
+function drawMap(regions, recos){
+  const svg = document.getElementById("map");
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  // reference points
+  for (const k in COORDS){
+    const lat = COORDS[k][0], lon = COORDS[k][1];
+    const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx", lon);
+    c.setAttribute("cy", lat);
+    c.setAttribute("r", 0.08);
+    c.setAttribute("fill", "#444");
+    svg.appendChild(c);
+    const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x", lon+0.1);
+    t.setAttribute("y", lat-0.05);
+    t.setAttribute("font-size", "0.28");
+    t.setAttribute("fill", "#444");
+    t.textContent = k.charAt(0).toUpperCase() + k.slice(1);
+    svg.appendChild(t);
+  }
+  // star on detected regions
+  for (const r of regions){
+    let tag = r;
+    if (!(tag in COORDS)){
+      if (r==="castilla y león") tag = "gijon";
+      else if (r==="murcia") tag = "valencia";
+      else continue;
+    }
+    const lat = COORDS[tag][0], lon = COORDS[tag][1];
+    const star = document.createElementNS("http://www.w3.org/2000/svg","path");
+    const size = 0.25;
+    const points = [];
+    for (let i=0;i<5;i++){ 
+      const ang = -Math.PI/2 + i*2*Math.PI/5;
+      const ang2 = ang + Math.PI/5;
+      points.push([lon + size*Math.cos(ang), lat + size*Math.sin(ang)]);
+      points.push([lon + size*0.45*Math.cos(ang2), lat + size*0.45*Math.sin(ang2)]);
+    }
+    let d = "M "+points.map(p=>p[0].toFixed(3)+","+p[1].toFixed(3)).join(" L ")+" Z";
+    star.setAttribute("d", d);
+    star.setAttribute("fill", "#0d6efd");
+    star.setAttribute("opacity", "0.8");
+    svg.appendChild(star);
+  }
+  // squares for installers
+  const seen = new Set();
+  for (const rec of recos.slice(0, 12)){
+    const tag = baseTagFromZona(rec["Zona"]);
+    if (!tag || !(tag in COORDS)) continue;
+    const lat = COORDS[tag][0], lon = COORDS[tag][1];
+    const key = tag+"|"+rec["Instalador"];
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const s = 0.18;
+    const sq = document.createElementNS("http://www.w3.org/2000/svg","rect");
+    sq.setAttribute("x", lon - s/2);
+    sq.setAttribute("y", lat - s/2);
+    sq.setAttribute("width", s);
+    sq.setAttribute("height", s);
+    sq.setAttribute("fill", "#ff7a00");
+    sq.setAttribute("opacity", "0.7");
+    svg.appendChild(sq);
+  }
+}
+
+function render(addr){
+  const regions = detectRegions(addr);
+  const cands = matchInstallers(regions);
+  const ordered = sortByRating(cands);
+  const tb = document.querySelector("#res tbody");
+  tb.innerHTML = "";
+  if (!ordered.length){
+    const tr = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 3;
+    td.textContent = "Sin coincidencias. Prueba con una ciudad/provincia (p.ej., Madrid, Valencia, Sevilla, Mallorca).";
+    tr.appendChild(td);
+    tb.appendChild(tr);
+  } else {
+    for (const r of ordered){
+      const tr = document.createElement("tr");
+      const td1 = document.createElement("td"); td1.textContent = r["Instalador"];
+      const td2 = document.createElement("td"); td2.textContent = r["Zona"];
+      const td3 = document.createElement("td"); td3.textContent = (r["Calificación"] ?? 0);
+      tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+      tb.appendChild(tr);
+    }
+  }
+  drawMap(regions, ordered);
+}
+
+document.getElementById("go").addEventListener("click", ()=>{
+  const addr = document.getElementById("addr").value;
+  render(addr);
+});
+</script>
+</body>
+</html>
