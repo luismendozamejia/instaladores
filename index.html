@@ -837,6 +837,845 @@
                 </ul>
               </li>
             </ul>
+			<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="UTF-8" />
+  <title>Customer Support Workflow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --bg-alt: #111827;
+      --card-bg: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --danger: #f97373;
+      --radius-lg: 14px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
+    }
+    
+
+    * {
+      
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* Top bar */
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.9rem 1.75rem;
+      background: linear-gradient(to right, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.85));
+      border-bottom: 1px solid rgba(55, 65, 81, 0.7);
+      backdrop-filter: blur(18px);
+    }
+
+    .top-bar-title {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 1rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .top-bar-title span.logo-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #e5e7eb, #38bdf8 40%, #0ea5e9 100%);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.9);
+    }
+
+    .credit {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: right;
+      opacity: 0.9;
+    }
+
+    .credit strong {
+      color: #e5e7eb;
+    }
+
+    /* Layout */
+
+    .page {
+      max-width: 960px;
+      margin: 1.75rem auto 3rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #111827 0, #020617 55%);
+      border-radius: 24px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.3rem;
+    }
+
+    .card-header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .card-header p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Search bar */
+
+    .search-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      border-radius: 999px;
+      padding: 0.35rem 0.55rem 0.35rem 0.9rem;
+      margin-bottom: 1.35rem;
+    }
+
+    .search-bar input[type="text"] {
+      flex: 1 1 160px;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      min-width: 0;
+    }
+
+    .search-bar input::placeholder {
+      color: #6b7280;
+    }
+
+    .search-buttons {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      white-space: nowrap;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(to right, #0ea5e9, #38bdf8);
+      color: #020617;
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.35);
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-muted);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.55);
+    }
+
+    .btn:active {
+      transform: translateY(0px) scale(0.99);
+      box-shadow: none;
+    }
+
+    .btn-icon {
+      font-size: 0.9rem;
+    }
+
+    .search-status {
+      margin-top: 0.35rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      min-height: 1em;
+    }
+
+    .search-status span {
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    /* Accordion */
+
+    .accordion-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    details.workflow-section {
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 0.55rem 0.9rem 0.65rem 0.9rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    details.workflow-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(56, 189, 248, 0.1),
+        transparent 40%,
+        transparent 80%,
+        rgba(56, 189, 248, 0.05)
+      );
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    details.workflow-section[open]::before {
+      opacity: 1;
+    }
+
+    details.workflow-section summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.35rem 0;
+    }
+
+    details.workflow-section summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .summary-main {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.16rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      color: var(--text-muted);
+    }
+
+    .summary-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .summary-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .summary-right {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .summary-chevron {
+      font-size: 0.85rem;
+      transition: transform 0.15s ease;
+    }
+
+    details[open] .summary-chevron {
+      transform: rotate(90deg);
+    }
+
+    .workflow-body {
+      padding-top: 0.5rem;
+      padding-bottom: 0.4rem;
+      border-top: 1px solid rgba(55, 65, 81, 0.9);
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    .workflow-body h3 {
+      margin-top: 0.4rem;
+      margin-bottom: 0.2rem;
+      font-size: 0.92rem;
+    }
+
+    .workflow-body p {
+      margin-top: 0.2rem;
+      margin-bottom: 0.2rem;
+      color: var(--text-main);
+    }
+
+    .workflow-body ul {
+      padding-left: 1.2rem;
+      margin-top: 0.2rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .workflow-body li {
+      margin-bottom: 0.2rem;
+      color: var(--text-main);
+    }
+
+    .note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 0.45rem 0.55rem;
+      border-radius: 0.75rem;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px dashed rgba(55, 65, 81, 0.9);
+      margin-top: 0.4rem;
+    }
+
+    .example-box {
+      font-size: 0.8rem;
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid rgba(31, 41, 55, 0.95);
+    }
+
+    /* Links */
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.35rem 1rem;
+      margin-top: 0.3rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.8rem;
+    }
+
+    .link-item span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    mark {
+      background: var(--accent-soft);
+      color: #f9fafb;
+      padding: 0.05rem 0.2rem;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 640px) {
+      .top-bar {
+        padding-inline: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+      }
+
+      .credit {
+        text-align: left;
+      }
+
+      .card {
+        padding: 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="top-bar">
+    <div class="top-bar-title">
+      <span class="logo-dot"></span>
+      <span>Support Workflow</span>
+    </div>
+    <div class="credit">
+      created by <strong>Luis Daniel Mendoza</strong> <span>@luisme</span>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="card">
+      <div class="card-header">
+        <h1>Customer Support Workflow</h1>
+        <p>Decision flow for contract type, plant not working, and low production cases.</p>
+      </div>
+
+      <!-- SEARCH BAR -->
+      <div class="search-bar">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search text inside this page (e.g. 'leasIng', 'overvoltage', 'Huawei')..."
+        />
+        <div class="search-buttons">
+          <button class="btn btn-primary" id="searchButton" title="Search in page">
+            <span class="btn-icon">🔍</span> Search
+          </button>
+          <button class="btn btn-ghost" id="clearButton" title="Clear highlights">
+            <span class="btn-icon">✖</span> Clear
+          </button>
+        </div>
+      </div>
+      <div class="search-status" id="searchStatus"></div>
+
+      <!-- ACCORDION SECTIONS -->
+      <div class="accordion-group">
+
+        <!-- SECTION 1: CONTRACT TYPE -->
+        <details class="workflow-section" open>
+          <summary>
+            <div class="summary-main">
+              <span class="badge">Step 1</span>
+              <div>
+                <div class="summary-title">Check contract type</div>
+                <div class="summary-sub">Is it a Buy Now or a Leasing contract?</div>
+              </div>
+            </div>
+            <div class="summary-right">
+              <span>Click to expand</span>
+              <span class="summary-chevron">▶</span>
+            </div>
+          </summary>
+
+          <div class="workflow-body">
+            <h3 data-searchable="true">1. Check the contract type</h3>
+            <p data-searchable="true">
+              First, verify whether the customer has a <strong>Buy Now</strong> contract or a
+              <strong>Leasing</strong> contract.
+            </p>
+
+            <h3 data-searchable="true">1.1 If it is a Buy Now contract</h3>
+            <ul>
+              <li data-searchable="true">
+                Check if the system is still inside the <strong>warranty period</strong>.
+              </li>
+              <li data-searchable="true">
+                <strong>If it is under warranty:</strong> provide full support to the customer and handle the issue as a
+                standard warranty case.
+              </li>
+              <li data-searchable="true">
+                <strong>If it is no longer under warranty:</strong>
+                <ul>
+                  <li data-searchable="true">Do your best to support and guide the customer anyway.</li>
+                  <li data-searchable="true">
+                    If an on-site visit or additional work is required, inform the customer that
+                    the intervention will be done <strong>under quotation</strong>.
+                  </li>
+                  <li data-searchable="true">
+                    Use the dedicated <em>“out of warranty / quotation needed”</em> template to explain the situation.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+
+            <h3 data-searchable="true">1.2 If it is a Leasing contract</h3>
+            <ul>
+              <li data-searchable="true">
+                Check if the customer is <strong>up to date with the payments</strong>.
+              </li>
+              <li data-searchable="true">
+                Check if the system is still <strong>within the warranty period</strong>.
+              </li>
+            </ul>
+
+            <p data-searchable="true">
+              If payments are up to date and the system is in warranty, provide support to the customer.
+            </p>
+
+            <p data-searchable="true">
+              If payments are <strong>not</strong> up to date, verify if the <strong>payment delay is caused by the
+              technical issue</strong>.
+            </p>
+
+            <ul>
+              <li data-searchable="true">
+                <strong>If the delay is clearly caused by the incident:</strong> provide support to the customer.
+              </li>
+              <li data-searchable="true">
+                <strong>If the delay is not related to the incident:</strong>
+                <ul>
+                  <li data-searchable="true">
+                    Explain to the customer that it is necessary to <strong>catch up with the payments</strong> in order
+                    to continue providing support.
+                  </li>
+                  <li data-searchable="true">
+                    Use the dedicated <em>“Leasing / overdue payments”</em> template to communicate this.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+
+            <div class="note" data-searchable="true">
+              Tip: Always document in the ticket whether the payment status and warranty period were checked,
+              and which template was used.
+            </div>
+          </div>
+        </details>
+
+        <!-- SECTION 2: PLANT NOT WORKING -->
+        <details class="workflow-section">
+          <summary>
+            <div class="summary-main">
+              <span class="badge">Step 2</span>
+              <div>
+                <div class="summary-title">Plant is not working</div>
+                <div class="summary-sub">Remote diagnostics and internet connection checks.</div>
+              </div>
+            </div>
+            <div class="summary-right">
+              <span>Click to expand</span>
+              <span class="summary-chevron">▶</span>
+            </div>
+          </summary>
+
+          <div class="workflow-body">
+            <h3 data-searchable="true">2. The plant is not working</h3>
+            <p data-searchable="true">
+              Start by checking the plant remotely in the monitoring portal of the inverter manufacturer.
+            </p>
+
+            <div class="example-box">
+              <strong>Remote portals by brand</strong>
+              <div class="link-grid">
+                <div class="link-item" data-searchable="true">
+                  Huawei<br />
+                  <a href="https://intl.fusionsolar.huawei.com/unisso/login.action?service=%2Funisess%2Fv1%2Fauth%3Fservice%3D%252Fnetecowebext%252Fhome%252Findex.html&decision=1#/LOGIN" target="_blank" rel="noopener noreferrer">
+                    intl.fusionsolar.huawei.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Growatt<br />
+                  <a href="http://oss.growatt.com/" target="_blank" rel="noopener noreferrer">
+                    oss.growatt.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Enphase<br />
+                  <a href="https://enlighten.enphaseenergy.com/" target="_blank" rel="noopener noreferrer">
+                    enlighten.enphaseenergy.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Ginlong Solis<br />
+                  <a href="https://www.soliscloud.com/" target="_blank" rel="noopener noreferrer">
+                    soliscloud.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Sofar Solar (Solarman)<br />
+                  <a href="https://pro.solarmanpv.com/business/maintain/plant" target="_blank" rel="noopener noreferrer">
+                    pro.solarmanpv.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  SMA<br />
+                  <a href="https://www.sunnyportal.com" target="_blank" rel="noopener noreferrer">
+                    sunnyportal.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Fronius<br />
+                  <a href="https://www.solarweb.com/" target="_blank" rel="noopener noreferrer">
+                    solarweb.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Zucchetti (Azzurro)<br />
+                  <a href="https://www.zcsazzurroportal.com/index.jsp" target="_blank" rel="noopener noreferrer">
+                    zcsazzurroportal.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  FoxESS<br />
+                  <a href="https://www.foxesscloud.com/" target="_blank" rel="noopener noreferrer">
+                    foxesscloud.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Victron<br />
+                  <a href="https://professional.victronenergy.com/accounts/details/#id_telephone" target="_blank" rel="noopener noreferrer">
+                    professional.victronenergy.com
+                  </a>
+                </div>
+                <div class="link-item" data-searchable="true">
+                  Sonnen<br />
+                  <a href="https://my.sonnen.de/" target="_blank" rel="noopener noreferrer">
+                    my.sonnen.de
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <h3 data-searchable="true">2.1 Check if the plant is connected to the internet</h3>
+            <ul>
+              <li data-searchable="true">
+                <strong>If the plant is connected to the internet:</strong>
+                <ul>
+                  <li data-searchable="true">
+                    Check if there are active <strong>alerts</strong> in the portal.
+					
+					<div class="example-box">
+  <strong>Inverter error codes by brand</strong>
+  <div class="link-grid">
+    <div class="link-item" data-searchable="true">
+      ZUCCHETTI<br />
+      <a
+        href="https://www.notion.so/otovo/Inverter-error-codes-list-2a0315ebc48f808490f7c41988d1b9d1?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      Solis<br />
+      <a
+        href="https://www.notion.so/otovo/Inverter-error-code-list-2a9315ebc48f803fadd4c35653499cdd?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      FoxESS<br />
+      <a
+        href="https://www.notion.so/otovo/Inverter-error-codes-list-2a3315ebc48f805caf77ca369a5d53f5?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      SIGENERGY<br />
+      <a
+        href="https://www.notion.so/otovo/Inverter-error-codes-list-2a9315ebc48f8044bbf9e7e6b4477901?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      HUAWEI<br />
+      <a
+        href="https://www.notion.so/otovo/Inverter-error-codes-list-2a9315ebc48f80299bfaed906dfc664d?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      ENPHASE<br />
+      <a
+        href="https://www.notion.so/otovo/Inverter-error-codes-list-2b9315ebc48f80679514f64d69a0b7a8?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      SMA<br />
+      <a
+        href="https://www.notion.so/otovo/Error-Codes-2a9315ebc48f80a389d8f7a8dfbf8676?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+  </div>
+</div>
+
+					
+                  </li>
+                  <li data-searchable="true">
+                    If you detect <strong>overvoltage</strong> or <strong>undervoltage</strong> alerts:
+                    <ul>
+                      <li data-searchable="true">
+                        Take screenshots of the alerts.
+                      </li>
+                      <li data-searchable="true">
+                        Send a template to the customer including the screenshots and explaining that the inverter is
+                        stopping due to voltage issues.
+                      </li>
+                    </ul>
+                  </li>
+                  <li data-searchable="true">
+                    If there are <strong>no relevant alerts</strong>: escalate the case to
+                    <strong>TM (Technical Manager / expert support)</strong>.
+                  </li>
+                </ul>
+              </li>
+              <li data-searchable="true">
+                <strong>If the plant is not connected to the internet:</strong>
+                <ul>
+                  <li data-searchable="true">
+                    Ask the customer if they have made any <strong>changes to their home internet network</strong>.
+                    Use the “internet configuration change” template.
+                  </li>
+                  <li data-searchable="true">
+                    Typical changes:
+                    <ul>
+                      <li data-searchable="true">Change of internet provider.</li>
+                      <li data-searchable="true">Change or relocation of the router.</li>
+                      <li data-searchable="true">Change of Wi-Fi name or password.</li>
+                    </ul>
+                  </li>
+                  <li data-searchable="true">
+                    If a change is confirmed (for example a new internet provider), send the
+                    <strong>reconfiguration guide</strong> for the inverter’s internet connection and review other
+                    possibilities with the customer.
+                  </li>
+				  <div class="example-box">
+  <strong>Wifi reconnection guides by brand</strong>
+  <div class="link-grid">
+    <div class="link-item" data-searchable="true">
+      solis<br />
+      <a
+        href="https://www.notion.so/otovo/How-to-reconnect-to-wifi-2a9315ebc48f80ba9063eb354f396764?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      ZUCCHETTI<br />
+      <a
+        href="https://www.notion.so/otovo/How-to-reconnect-the-wifi-2a0315ebc48f8011b34eea9dd480b305?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      SIGENERGY<br />
+      <a
+        href="https://www.notion.so/otovo/How-to-reconnect-the-wifi-2a9315ebc48f80469c29d128b2695679?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      FOXXES<br />
+      <a
+        href="https://www.notion.so/otovo/How-to-reconnect-the-wifi-2a3315ebc48f80b4b3c7f301f759d310?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      HUAWEI<br />
+      <a
+        href="https://www.notion.so/otovo/How-to-reconnet-the-wifi-2a9315ebc48f80cfa4d4f7b791cfdb50?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      ENPHASE<br />
+      <a
+        href="https://www.notion.so/otovo/How-to-reconnet-the-wifi-2b9315ebc48f8045a524c54a585a139c?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+    <div class="link-item" data-searchable="true">
+      SMA<br />
+      <a
+        href="https://www.notion.so/otovo/Wifi-Reconnection-Guide-2a9315ebc48f8011ba25f2c6cb3e5bca?source=copy_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open guide
+      </a>
+    </div>
+  </div>
+</div>
+
+				  
+                  <li data-searchable="true">
+                    Also ask the customer if all <strong>electrical protections are ON (up)</strong>.
+                    Request:
+                    <ul>
+                      <li data-searchable="true">A picture of the protections / electrical board.</li>
+                      <li data-searchable="true">A picture of the inverter.</li>
+                    </ul>
+                  </li>
+                  <li data-searchable="true">
+                    After receiving the pictures, <strong>escalate to TM</strong> for deeper technical analysis.
+                  </li>
+                </ul>
+              </li>
+            </ul>
 
             <div class="note" data-searchable="true">
               Always log which remote portal you used and whether the issue is related to voltage, internet
@@ -948,6 +1787,176 @@
               <p data-searchable="true">
                 Ask the customer a video of the inverter and the fueses, escalate the ticket to TM.
               </p>
+
+        <!-- SECTION 3: LOW PRODUCTION -->
+        <details class="workflow-section">
+          <summary>
+            <div class="summary-main">
+              <span class="badge">Step 3</span>
+              <div>
+                <div class="summary-title">Plant does not produce enough</div>
+                <div class="summary-sub">Check inverter and panel power limitations.</div>
+              </div>
+            </div>
+            <div class="summary-right">
+              <span>Click to expand</span>
+              <span class="summary-chevron">▶</span>
+            </div>
+          </summary>
+
+          <div class="workflow-body">
+            <h3 data-searchable="true">3. The plant does not produce enough</h3>
+            <p data-searchable="true">
+              When the customer reports that the plant is not producing enough, start by checking
+              the <strong>installed power</strong> and the <strong>inverter nominal power</strong>.
+            </p>
+
+            <ul>
+              <li data-searchable="true">
+                The maximum production is mainly limited by:
+                <ul>
+                  <li data-searchable="true"><strong>The inverter nominal power.</strong></li>
+                  <li data-searchable="true"><strong>The total DC power of the PV modules.</strong></li>
+                </ul>
+              </li>
+            </ul>
+
+            <div class="example-box">
+              <p data-searchable="true">
+                <strong>Example for customer explanation (use in a template):</strong>
+              </p>
+              <p data-searchable="true">
+                Imagine a <strong>Huawei SUN2000-3.68</strong> inverter.
+                The inverter has a nominal AC power of <strong>3.68 kW</strong>.
+              </p>
+              <p data-searchable="true">
+                The customer has installed <strong>10 panels of 500 W</strong> each, which gives a total DC power of
+                approximately <strong>5 kW</strong>.
+              </p>
+              <p data-searchable="true">
+                Even though the total panel power is 5 kW, the plant will <strong>never exceed 3.68 kW</strong> of
+                instantaneous production, because this is the <strong>limit of the inverter</strong>.
+              </p>
+              <p data-searchable="true">
+                This does <em>not</em> mean the system is wrong; it means the design is made so that the inverter can
+                reach its nominal power more often and for more hours during the day, improving the overall energy
+                yield throughout the year.
+              </p>
+            </div>
+
+            <div class="note" data-searchable="true">
+              Suggestion: include a simple chart or screenshot from the monitoring portal when explaining power
+              limitations, so the customer can visually understand why the curve is “capped” at the inverter’s
+              nominal power.
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const searchInput = document.getElementById("searchInput");
+      const searchButton = document.getElementById("searchButton");
+      const clearButton = document.getElementById("clearButton");
+      const searchStatus = document.getElementById("searchStatus");
+      const searchableNodes = Array.from(
+        document.querySelectorAll("[data-searchable='true']")
+      );
+
+      // Save original text content once
+      searchableNodes.forEach((node) => {
+        node.dataset.originalText = node.textContent;
+      });
+
+      function escapeRegExp(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }
+
+      function clearHighlights() {
+        searchableNodes.forEach((node) => {
+          if (node.dataset.originalText !== undefined) {
+            node.textContent = node.dataset.originalText;
+          }
+        });
+        searchStatus.textContent = "";
+      }
+
+      function performSearch() {
+        const query = searchInput.value.trim();
+        clearHighlights();
+
+        if (!query) {
+          searchStatus.textContent = "";
+          return;
+        }
+
+        const regex = new RegExp("(" + escapeRegExp(query) + ")", "gi");
+        let matchCount = 0;
+
+        searchableNodes.forEach((node) => {
+          const original = node.dataset.originalText;
+          if (!original) return;
+
+          if (regex.test(original)) {
+            matchCount++;
+            const highlighted = original.replace(
+              regex,
+              "<mark>$1</mark>"
+            );
+            node.innerHTML = highlighted;
+          }
+        });
+
+        if (matchCount === 0) {
+          searchStatus.innerHTML =
+            'No matches found for <span>"' + query + '"</span>.';
+        } else {
+          searchStatus.innerHTML =
+            'Found <span>' +
+            matchCount +
+            "</span> matching element" +
+            (matchCount > 1 ? "s" : "") +
+            ' for <span>"' +
+            query +
+            '"</span>.';
+
+          const firstMark = document.querySelector("mark");
+          if (firstMark) {
+            firstMark.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
+      }
+
+
+      searchButton.addEventListener("click", performSearch);
+
+      clearButton.addEventListener("click", () => {
+        searchInput.value = "";
+        clearHighlights();
+      });
+
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          performSearch();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
+
+            <div class="note" data-searchable="true">
+              Always log which remote portal you used and whether the issue is related to voltage, internet
+              configuration, or needs expert escalation.
+            </div>
+          </div>
+        </details>
+		
+	
 
         <!-- SECTION 3: LOW PRODUCTION -->
         <details class="workflow-section">
